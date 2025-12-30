@@ -26,6 +26,12 @@ use crate::provider::open_ai_compatible::OpenAiCompatibleLanguageModelProvider;
 use crate::provider::open_router::OpenRouterLanguageModelProvider;
 use crate::provider::vercel::VercelLanguageModelProvider;
 use crate::provider::x_ai::XAiLanguageModelProvider;
+use crate::provider::zhipu::ZhipuLanguageModelProvider;
+use crate::provider::qwen::QwenLanguageModelProvider;
+use crate::provider::claude::ClaudeLanguageModelProvider;
+use crate::provider::gemini::GeminiLanguageModelProvider;
+use crate::provider::qwen_codecli::QwenCodeCliLanguageModelProvider;
+use crate::provider::minimax::MinimaxLanguageModelProvider;
 pub use crate::settings::*;
 
 pub fn init(user_store: Entity<UserStore>, client: Arc<Client>, cx: &mut App) {
@@ -210,6 +216,35 @@ fn register_language_model_providers(
     );
     registry.register_provider(
         Arc::new(XAiLanguageModelProvider::new(client.http_client(), cx)),
+        cx,
+    );
+    registry.register_provider(
+        Arc::new(ZhipuLanguageModelProvider::new(client.http_client(), cx)),
+        cx,
+    );
+    
+    registry.register_provider(
+        Arc::new(QwenLanguageModelProvider::new(client.http_client(), cx)),
+        cx,
+    );
+    
+    registry.register_provider(
+        Arc::new(ClaudeLanguageModelProvider::new(client.http_client(), cx)),
+        cx,
+    );
+    
+    registry.register_provider(
+        Arc::new(GeminiLanguageModelProvider::new(client.http_client(), cx)),
+        cx,
+    );
+    
+    registry.register_provider(
+        Arc::new(QwenCodeCliLanguageModelProvider::new(client.http_client(), cx)),
+        cx,
+    );
+    
+    registry.register_provider(
+        Arc::new(MinimaxLanguageModelProvider::new(client.http_client(), cx)),
         cx,
     );
     registry.register_provider(Arc::new(CopilotChatLanguageModelProvider::new(cx)), cx);

@@ -61,6 +61,26 @@ pub const ZED_CLOUD_PROVIDER_ID: LanguageModelProviderId = LanguageModelProvider
 pub const ZED_CLOUD_PROVIDER_NAME: LanguageModelProviderName =
     LanguageModelProviderName::new("Zed");
 
+pub const ZHIPU_PROVIDER_ID: LanguageModelProviderId = LanguageModelProviderId::new("zhipu");
+pub const ZHIPU_PROVIDER_NAME: LanguageModelProviderName =
+    LanguageModelProviderName::new("Zhipu AI");
+
+pub const QWEN_PROVIDER_ID: LanguageModelProviderId = LanguageModelProviderId::new("qwen");
+pub const QWEN_PROVIDER_NAME: LanguageModelProviderName =
+    LanguageModelProviderName::new("Qwen AI");
+
+pub const CLAUDE_PROVIDER_ID: LanguageModelProviderId = LanguageModelProviderId::new("claude");
+pub const CLAUDE_PROVIDER_NAME: LanguageModelProviderName =
+    LanguageModelProviderName::new("Claude AI");
+
+pub const GEMINI_PROVIDER_ID: LanguageModelProviderId = LanguageModelProviderId::new("gemini");
+pub const GEMINI_PROVIDER_NAME: LanguageModelProviderName =
+    LanguageModelProviderName::new("Gemini AI");
+
+pub const QWEN_CODECLI_PROVIDER_ID: LanguageModelProviderId = LanguageModelProviderId::new("qwen_codecli");
+pub const QWEN_CODECLI_PROVIDER_NAME: LanguageModelProviderName =
+    LanguageModelProviderName::new("Qwen CodeCLI");
+
 pub fn init(client: Arc<Client>, cx: &mut App) {
     init_settings(cx);
     RefreshLlmTokenListener::register(client, cx);

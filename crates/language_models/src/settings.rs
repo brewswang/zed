@@ -1,14 +1,25 @@
 use std::sync::Arc;
 
 use collections::HashMap;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 use settings::RegisterSetting;
+
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema, PartialEq)]
+pub struct MinimaxAvailableModel {
+    pub name: String,
+    pub display_name: Option<String>,
+    pub max_tokens: u32,
+}
 
 use crate::provider::{
     anthropic::AnthropicSettings, bedrock::AmazonBedrockSettings, cloud::ZedDotDevSettings,
     deepseek::DeepSeekSettings, google::GoogleSettings, lmstudio::LmStudioSettings,
     mistral::MistralSettings, ollama::OllamaSettings, open_ai::OpenAiSettings,
     open_ai_compatible::OpenAiCompatibleSettings, open_router::OpenRouterSettings,
-    vercel::VercelSettings, x_ai::XAiSettings,
+    vercel::VercelSettings, x_ai::XAiSettings, zhipu::ZhipuSettings,
+    qwen::QwenSettings, claude::ClaudeSettings, gemini::GeminiSettings,
+    qwen_codecli::QwenCodeCliSettings, minimax::MinimaxSettings,
 };
 
 #[derive(Debug, RegisterSetting)]
@@ -26,6 +37,12 @@ pub struct AllLanguageModelSettings {
     pub vercel: VercelSettings,
     pub x_ai: XAiSettings,
     pub zed_dot_dev: ZedDotDevSettings,
+    pub zhipu: ZhipuSettings,
+    pub qwen: QwenSettings,
+    pub claude: ClaudeSettings,
+    pub gemini: GeminiSettings,
+    pub qwen_codecli: QwenCodeCliSettings,
+    pub minimax: MinimaxSettings,
 }
 
 impl settings::Settings for AllLanguageModelSettings {
@@ -46,6 +63,12 @@ impl settings::Settings for AllLanguageModelSettings {
         let vercel = language_models.vercel.unwrap();
         let x_ai = language_models.x_ai.unwrap();
         let zed_dot_dev = language_models.zed_dot_dev.unwrap();
+        let zhipu = language_models.zhipu.unwrap_or_default();
+        let qwen = language_models.qwen.unwrap_or_default();
+        let claude = language_models.claude.unwrap_or_default();
+        let gemini = language_models.gemini.unwrap_or_default();
+        let qwen_codecli = language_models.qwen_codecli.unwrap_or_default();
+        let minimax = language_models.minimax.unwrap_or_default();
         Self {
             anthropic: AnthropicSettings {
                 api_url: anthropic.api_url.unwrap(),
@@ -111,6 +134,30 @@ impl settings::Settings for AllLanguageModelSettings {
             },
             zed_dot_dev: ZedDotDevSettings {
                 available_models: zed_dot_dev.available_models.unwrap_or_default(),
+            },
+            zhipu: ZhipuSettings {
+                api_url: zhipu.api_url.unwrap_or_default(),
+                available_models: zhipu.available_models.unwrap_or_default(),
+            },
+            qwen: QwenSettings {
+                api_url: qwen.api_url.unwrap_or_default(),
+                available_models: qwen.available_models.unwrap_or_default(),
+            },
+            claude: ClaudeSettings {
+                api_url: claude.api_url.unwrap_or_default(),
+                available_models: claude.available_models.unwrap_or_default(),
+            },
+            gemini: GeminiSettings {
+                api_url: gemini.api_url.unwrap_or_default(),
+                available_models: gemini.available_models.unwrap_or_default(),
+            },
+            qwen_codecli: QwenCodeCliSettings {
+                api_url: qwen_codecli.api_url.unwrap_or_default(),
+                available_models: qwen_codecli.available_models.unwrap_or_default(),
+            },
+            minimax: MinimaxSettings {
+                api_url: minimax.api_url.unwrap_or_default(),
+                available_models: minimax.available_models.unwrap_or_default(),
             },
         }
     }
