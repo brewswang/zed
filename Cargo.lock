@@ -8972,6 +8972,7 @@ dependencies = [
  "google_ai",
  "gpui",
  "gpui_tokio",
+ "http-body-util",
  "http_client",
  "language",
  "language_model",
