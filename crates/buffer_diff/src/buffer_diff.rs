@@ -1225,7 +1225,7 @@ impl BufferDiff {
                     language_registry.clone(),
                     cx,
                 )
-            })?
+            })
             .await
         } else {
             this.read_with(cx, |this, cx| {
@@ -1235,7 +1235,7 @@ impl BufferDiff {
                     this.base_text().clone(),
                     cx,
                 )
-            })?
+            })
             .await
         })
     }
@@ -1409,8 +1409,7 @@ impl BufferDiff {
             };
             this.update(cx, |this, cx| {
                 this.set_snapshot(snapshot, &buffer, cx);
-            })
-            .log_err();
+            });
             drop(complete_on_drop)
         })
         .detach();
