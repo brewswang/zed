@@ -504,9 +504,9 @@ impl SettingsStore {
         update: impl 'static + Send + FnOnce(&mut SettingsContent, &App),
     ) {
         _ = self.update_settings_file_inner(fs, move |old_text: String, cx: AsyncApp| {
-            cx.read_global(|store: &SettingsStore, cx| {
+            Ok(cx.read_global(|store: &SettingsStore, cx| {
                 store.new_text_for_update(old_text, |content| update(content, cx))
-            })
+            }))
         });
     }
 
@@ -516,9 +516,9 @@ impl SettingsStore {
         vscode_settings: VsCodeSettings,
     ) -> oneshot::Receiver<Result<()>> {
         self.update_settings_file_inner(fs, move |old_text: String, cx: AsyncApp| {
-            cx.read_global(|store: &SettingsStore, _cx| {
+            Ok(cx.read_global(|store: &SettingsStore, _cx| {
                 store.get_vscode_edits(old_text, &vscode_settings)
-            })
+            }))
         })
     }
 
