@@ -236,7 +236,7 @@ impl CommitView {
                             .repo_path_to_project_path(&file.path, cx)
                             .map(|path| path.worktree_id)
                             .or(first_worktree_id)
-                    })?
+                    })
                     .context("project has no worktrees")?;
                 let short_sha = commit_sha.get(0..7).unwrap_or(&commit_sha);
                 let file_name = file
@@ -506,7 +506,7 @@ impl CommitView {
                         return Err(anyhow::anyhow!("Stash has changed, not applying"));
                     }
                     Ok(repo.stash_apply(Some(stash), cx))
-                })?;
+                });
 
                 match result {
                     Ok(task) => task.await?,
@@ -533,7 +533,7 @@ impl CommitView {
                         return Err(anyhow::anyhow!("Stash has changed, pop aborted"));
                     }
                     Ok(repo.stash_pop(Some(stash), cx))
-                })?;
+                });
 
                 match result {
                     Ok(task) => task.await?,
@@ -560,7 +560,7 @@ impl CommitView {
                         return Err(anyhow::anyhow!("Stash has changed, drop aborted"));
                     }
                     Ok(repo.stash_drop(Some(stash), cx))
-                })?;
+                });
 
                 match result {
                     Ok(task) => task.await??,
@@ -624,7 +624,7 @@ impl CommitView {
                     workspace
                         .panel::<GitPanel>(cx)
                         .and_then(|p| p.read(cx).active_repository.clone())
-                })?;
+                });
 
                 let Some(repo) = repo else {
                     return Ok(());
@@ -703,7 +703,7 @@ async fn build_buffer(
     let line_ending = LineEnding::detect(&text);
     LineEnding::normalize(&mut text);
     let text = Rope::from(text);
-    let language = cx.update(|cx| language_registry.language_for_file(&blob, Some(&text), cx))?;
+    let language = cx.update(|cx| language_registry.language_for_file(&blob, Some(&text), cx));
     let language = if let Some(language) = language {
         language_registry
             .load_language(&language)
@@ -723,7 +723,7 @@ async fn build_buffer(
         let mut buffer = Buffer::build(buffer, Some(blob), Capability::ReadWrite);
         buffer.set_language_async(language, cx);
         buffer
-    })?;
+    });
     Ok(buffer)
 }
 
@@ -737,7 +737,7 @@ async fn build_buffer_diff(
         LineEnding::normalize(old_text);
     }
 
-    let buffer = cx.update(|cx| buffer.read(cx).snapshot())?;
+    let buffer = cx.update(|cx| buffer.read(cx).snapshot());
 
     let base_buffer = cx
         .update(|cx| {
@@ -747,7 +747,7 @@ async fn build_buffer_diff(
                 Some(language_registry.clone()),
                 cx,
             )
-        })?
+        })
         .await;
 
     let diff_snapshot = cx
@@ -758,14 +758,14 @@ async fn build_buffer_diff(
                 base_buffer,
                 cx,
             )
-        })?
+        })
         .await;
 
-    cx.new(|cx| {
+    Ok(cx.new(|cx| {
         let mut diff = BufferDiff::new(&buffer.text, cx);
         diff.set_snapshot(diff_snapshot, &buffer.text, cx);
         diff
-    })
+    }))
 }
 
 impl EventEmitter<EditorEvent> for CommitView {}

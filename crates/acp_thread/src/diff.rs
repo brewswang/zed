@@ -222,7 +222,7 @@ impl PendingDiff {
                 diff.secondary_diff().unwrap().update(cx, |diff, cx| {
                     diff.set_snapshot(diff_snapshot.clone(), &text_snapshot, cx);
                 });
-            })?;
+            });
             diff.update(cx, |diff, cx| {
                 if let Diff::Pending(diff) = diff {
                     diff.update_visible_ranges(cx);

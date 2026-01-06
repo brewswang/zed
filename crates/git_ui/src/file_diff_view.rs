@@ -47,10 +47,10 @@ impl FileDiffView {
         window.spawn(cx, async move |cx| {
             let project = workspace.update(cx, |workspace, _| workspace.project().clone())?;
             let old_buffer = project
-                .update(cx, |project, cx| project.open_local_buffer(&old_path, cx))?
+                .update(cx, |project, cx| project.open_local_buffer(&old_path, cx))
                 .await?;
             let new_buffer = project
-                .update(cx, |project, cx| project.open_local_buffer(&new_path, cx))?
+                .update(cx, |project, cx| project.open_local_buffer(&new_path, cx))
                 .await?;
 
             let buffer_diff = build_buffer_diff(&old_buffer, &new_buffer, cx).await?;
@@ -151,11 +151,11 @@ impl FileDiffView {
                                 old_snapshot,
                                 cx,
                             )
-                        })?
+                        })
                         .await;
                     diff.update(cx, |diff, cx| {
                         diff.set_snapshot(diff_snapshot, &new_snapshot, cx)
-                    })?;
+                    });
                     log::trace!("finish recalculating");
                 }
                 Ok(())
@@ -169,8 +169,8 @@ async fn build_buffer_diff(
     new_buffer: &Entity<Buffer>,
     cx: &mut AsyncApp,
 ) -> Result<Entity<BufferDiff>> {
-    let old_buffer_snapshot = old_buffer.read_with(cx, |buffer, _| buffer.snapshot())?;
-    let new_buffer_snapshot = new_buffer.read_with(cx, |buffer, _| buffer.snapshot())?;
+    let old_buffer_snapshot = old_buffer.read_with(cx, |buffer, _| buffer.snapshot());
+    let new_buffer_snapshot = new_buffer.read_with(cx, |buffer, _| buffer.snapshot());
 
     let diff_snapshot = cx
         .update(|cx| {
@@ -180,14 +180,14 @@ async fn build_buffer_diff(
                 old_buffer_snapshot,
                 cx,
             )
-        })?
+        })
         .await;
 
-    cx.new(|cx| {
+    Ok(cx.new(|cx| {
         let mut diff = BufferDiff::new(&new_buffer_snapshot.text, cx);
         diff.set_snapshot(diff_snapshot, &new_buffer_snapshot.text, cx);
         diff
-    })
+    }))
 }
 
 impl EventEmitter<EditorEvent> for FileDiffView {}

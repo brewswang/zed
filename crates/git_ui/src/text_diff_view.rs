@@ -256,9 +256,9 @@ async fn update_diff_buffer(
     clipboard_buffer: &Entity<Buffer>,
     cx: &mut AsyncApp,
 ) -> Result<()> {
-    let source_buffer_snapshot = source_buffer.read_with(cx, |buffer, _| buffer.snapshot())?;
+    let source_buffer_snapshot = source_buffer.read_with(cx, |buffer, _| buffer.snapshot());
 
-    let base_buffer_snapshot = clipboard_buffer.read_with(cx, |buffer, _| buffer.snapshot())?;
+    let base_buffer_snapshot = clipboard_buffer.read_with(cx, |buffer, _| buffer.snapshot());
     let base_text = base_buffer_snapshot.text();
 
     let diff_snapshot = cx
@@ -269,12 +269,12 @@ async fn update_diff_buffer(
                 base_buffer_snapshot,
                 cx,
             )
-        })?
+        })
         .await;
 
     diff.update(cx, |diff, cx| {
         diff.set_snapshot(diff_snapshot, &source_buffer_snapshot.text, cx);
-    })?;
+    });
     Ok(())
 }
 

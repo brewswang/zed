@@ -14,7 +14,7 @@ use edit_prediction_context_view::EditPredictionContextView;
 use editor::Editor;
 use feature_flags::FeatureFlagAppExt as _;
 use git::repository::DiffType;
-use gpui::{Window, actions};
+use gpui::{Entity, Window, actions};
 use language::ToPoint as _;
 use log;
 use project::DisableAiSettings;
@@ -254,7 +254,7 @@ fn capture_edit_prediction_example(
 
         let uncommitted_diff_rx = repository.update(cx, |repository, cx| {
             repository.diff(DiffType::HeadToWorktree, cx)
-        })?;
+        });
 
         let uncommitted_diff = match uncommitted_diff_rx.await {
             Ok(Ok(diff)) => diff,
@@ -306,13 +306,13 @@ fn capture_edit_prediction_example(
         }
         .to_markdown();
 
-        let buffer = project
-            .update(cx, |project, cx| project.create_buffer(false, cx))?
+        let buffer: Entity<language::Buffer> = project
+            .update(cx, |project, cx| project.create_buffer(false, cx))
             .await?;
         buffer.update(cx, |buffer, cx| {
             buffer.set_text(markdown, cx);
             buffer.set_language(Some(markdown_language), cx);
-        })?;
+        });
 
         workspace_entity.update_in(cx, |workspace, window, cx| {
             workspace.add_item_to_active_pane(
