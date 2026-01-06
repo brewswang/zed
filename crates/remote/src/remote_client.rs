@@ -957,7 +957,6 @@ impl RemoteClient {
                         panic!("missing test connection")
                     }
                 })
-                .unwrap()
                 .await
                 .unwrap();
 

@@ -180,10 +180,7 @@ impl Search {
                 let query = Arc::new(query);
                 let (candidate_searcher, tasks) = match self.kind {
                     SearchKind::OpenBuffersOnly => {
-                        let Ok(open_buffers) = cx.update(|cx| self.all_loaded_buffers(&query, cx))
-                        else {
-                            return;
-                        };
+                        let open_buffers = cx.update(|cx| self.all_loaded_buffers(&query, cx));
                         let fill_requests = cx
                             .background_spawn(async move {
                                 for buffer in open_buffers {
@@ -248,16 +245,14 @@ impl Search {
                             query: Some(query.to_proto()),
                             limit: self.limit as _,
                         });
-                        let Ok(guard) = cx.update(|cx| {
+                        let guard = cx.update(|cx| {
                             Project::retain_remotely_created_models_impl(
                                 &models,
                                 &self.buffer_store,
                                 &self.worktree_store,
                                 cx,
                             )
-                        }) else {
-                            return;
-                        };
+                        });
                         let buffer_store = self.buffer_store.downgrade();
                         let issue_remote_buffers_request = cx
                             .spawn(async move |cx| {
@@ -370,7 +365,7 @@ impl Search {
                     let (mut snapshot, worktree_settings) = worktree
                         .read_with(cx, |this, _| {
                             Some((this.snapshot(), this.as_local()?.settings()))
-                        })?
+                        })
                         .context("The worktree is not local")?;
                     if query.include_ignored() {
                         // Pre-fetch all of the ignored directories as they're going to be searched.
@@ -392,11 +387,11 @@ impl Search {
                                 .map(|path| local.add_path_prefix_to_scan(path).into_future())
                                 .collect::<Vec<_>>();
                             Some(barrier)
-                        })?;
+                        });
                         if let Some(barriers) = barrier {
                             futures::future::join_all(barriers).await;
                         }
-                        snapshot = worktree.read_with(cx, |this, _| this.snapshot())?;
+                        snapshot = worktree.read_with(cx, |this, _| this.snapshot());
                     }
                     cx.background_executor()
                         .scoped(|scope| {
@@ -465,7 +460,7 @@ impl Search {
                         .into_iter()
                         .map(|path| this.open_buffer(path, cx))
                         .collect::<FuturesOrdered<_>>()
-                })?;
+                });
 
                 while let Some(buffer) = buffers.next().await {
                     if let Some(buffer) = buffer.log_err() {
@@ -490,7 +485,7 @@ impl Search {
     ) {
         _ = maybe!(async move {
             while let Ok(buffer) = rx.recv().await {
-                let snapshot = buffer.read_with(&mut cx, |this, _| this.snapshot())?;
+                let snapshot = buffer.read_with(&mut cx, |this, _| this.snapshot());
                 let (tx, rx) = oneshot::channel();
                 find_all_matches_tx.send((buffer, snapshot, tx)).await?;
                 results.send(rx).await?;
