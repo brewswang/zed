@@ -346,7 +346,7 @@ impl LanguageServerState {
                                         cx,
                                     );
                                     buffer.set_capability(language::Capability::ReadOnly, cx);
-                                })?;
+                                });
 
                                 workspace.update(cx, |workspace, cx| {
                                     window.update(cx, |_, window, cx| {

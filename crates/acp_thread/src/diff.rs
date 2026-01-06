@@ -35,7 +35,7 @@ impl Diff {
                     .await
                     .log_err();
 
-                buffer.update(cx, |buffer, cx| buffer.set_language(language.clone(), cx))?;
+                buffer.update(cx, |buffer, cx| buffer.set_language(language.clone(), cx));
 
                 let diff = build_buffer_diff(
                     old_text.unwrap_or("".into()).into(),
@@ -45,31 +45,29 @@ impl Diff {
                 )
                 .await?;
 
-                multibuffer
-                    .update(cx, |multibuffer, cx| {
-                        let hunk_ranges = {
-                            let buffer = buffer.read(cx);
-                            let diff = diff.read(cx);
-                            diff.hunks_intersecting_range(
-                                Anchor::min_for_buffer(buffer.remote_id())
-                                    ..Anchor::max_for_buffer(buffer.remote_id()),
-                                buffer,
-                                cx,
-                            )
-                            .map(|diff_hunk| diff_hunk.buffer_range.to_point(buffer))
-                            .collect::<Vec<_>>()
-                        };
-
-                        multibuffer.set_excerpts_for_path(
-                            PathKey::for_buffer(&buffer, cx),
-                            buffer.clone(),
-                            hunk_ranges,
-                            multibuffer_context_lines(cx),
+                multibuffer.update(cx, |multibuffer, cx| {
+                    let hunk_ranges = {
+                        let buffer = buffer.read(cx);
+                        let diff = diff.read(cx);
+                        diff.hunks_intersecting_range(
+                            Anchor::min_for_buffer(buffer.remote_id())
+                                ..Anchor::max_for_buffer(buffer.remote_id()),
+                            buffer,
                             cx,
-                        );
-                        multibuffer.add_diff(diff, cx);
-                    })
-                    .log_err();
+                        )
+                        .map(|diff_hunk| diff_hunk.buffer_range.to_point(buffer))
+                        .collect::<Vec<_>>()
+                    };
+
+                    multibuffer.set_excerpts_for_path(
+                        PathKey::for_buffer(&buffer, cx),
+                        buffer.clone(),
+                        hunk_ranges,
+                        multibuffer_context_lines(cx),
+                        cx,
+                    );
+                    multibuffer.add_diff(diff, cx);
+                });
 
                 anyhow::Ok(())
             }
@@ -207,7 +205,7 @@ impl PendingDiff {
         let buffer_diff = self.diff.clone();
         let base_text = self.base_text.clone();
         self.update_diff = cx.spawn(async move |diff, cx| {
-            let text_snapshot = buffer.read_with(cx, |buffer, _| buffer.text_snapshot())?;
+            let text_snapshot = buffer.read_with(cx, |buffer, _| buffer.text_snapshot());
             let diff_snapshot = BufferDiff::update_diff(
                 buffer_diff.clone(),
                 text_snapshot.clone(),
@@ -369,7 +367,7 @@ async fn build_buffer_diff(
     language_registry: Option<Arc<LanguageRegistry>>,
     cx: &mut AsyncApp,
 ) -> Result<Entity<BufferDiff>> {
-    let buffer = cx.update(|cx| buffer.read(cx).snapshot())?;
+    let buffer = cx.update(|cx| buffer.read(cx).snapshot());
 
     let old_text_rope = cx
         .background_spawn({
@@ -385,7 +383,7 @@ async fn build_buffer_diff(
                 language_registry,
                 cx,
             )
-        })?
+        })
         .await;
 
     let diff_snapshot = cx
@@ -396,21 +394,21 @@ async fn build_buffer_diff(
                 base_buffer,
                 cx,
             )
-        })?
+        })
         .await;
 
     let secondary_diff = cx.new(|cx| {
         let mut diff = BufferDiff::new(&buffer, cx);
         diff.set_snapshot(diff_snapshot.clone(), &buffer, cx);
         diff
-    })?;
+    });
 
-    cx.new(|cx| {
+    Ok(cx.new(|cx| {
         let mut diff = BufferDiff::new(&buffer.text, cx);
         diff.set_snapshot(diff_snapshot, &buffer, cx);
         diff.set_secondary_diff(secondary_diff);
         diff
-    })
+    }))
 }
 
 #[cfg(test)]
