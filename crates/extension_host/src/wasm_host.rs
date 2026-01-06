@@ -666,7 +666,7 @@ impl WasmHost {
                 cx.background_executor().spawn(load_extension_task).await?;
             // we need to run run the task in a tokio context as wasmtime_wasi may
             // call into tokio, accessing its runtime handle when we trigger the `engine.increment_epoch()` above.
-            let task = Arc::new(gpui_tokio::Tokio::spawn(cx, extension_task)?);
+            let task = Arc::new(gpui_tokio::Tokio::spawn(cx, extension_task));
 
             Ok(WasmExtension {
                 manifest,

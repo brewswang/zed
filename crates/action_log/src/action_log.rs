@@ -192,7 +192,7 @@ impl ActionLog {
             .ok();
         let buffer_repo = git_store.read_with(cx, |git_store, cx| {
             git_store.repository_and_path_for_buffer_id(buffer.read(cx).remote_id(), cx)
-        })?;
+        });
 
         let (mut git_diff_updates_tx, mut git_diff_updates_rx) = watch::channel(());
         let _repo_subscription =
@@ -208,7 +208,7 @@ impl ActionLog {
                             }
                         }
                     }))
-                })?
+                })
             } else {
                 None
             };
@@ -434,7 +434,7 @@ impl ActionLog {
 
             diff.update(cx, |diff, cx| {
                 diff.set_snapshot(diff_snapshot, &buffer_snapshot, cx);
-            })?;
+            });
         }
         this.update(cx, |this, cx| {
             let tracked_buffer = this

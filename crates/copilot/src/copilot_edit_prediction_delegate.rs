@@ -75,19 +75,17 @@ impl EditPredictionDelegate for CopilotEditPredictionDelegate {
             let completions = copilot
                 .update(cx, |copilot, cx| {
                     copilot.completions(&buffer, cursor_position, cx)
-                })?
+                })
                 .await?;
 
             if let Some(mut completion) = completions.into_iter().next()
-                && let Some(trimmed_completion) = cx
-                    .update(|cx| trim_completion(&completion, cx))
-                    .ok()
-                    .flatten()
+                && let Some(trimmed_completion) =
+                    cx.update(|cx| trim_completion(&completion, cx))
             {
                 let preview = buffer
                     .update(cx, |this, cx| {
                         this.preview_edits(Arc::from(std::slice::from_ref(&trimmed_completion)), cx)
-                    })?
+                    })
                     .await;
                 this.update(cx, |this, cx| {
                     this.pending_refresh = None;

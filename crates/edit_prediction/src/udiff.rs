@@ -39,7 +39,7 @@ pub async fn apply_diff(
                 .read(cx)
                 .id(),
         )
-    })??;
+    })?;
 
     for line in diff_str.lines() {
         let diff_line = DiffLine::parse(line);
@@ -52,7 +52,7 @@ pub async fn apply_diff(
                         path: RelPath::new(Path::new(path.as_ref()), PathStyle::Posix)?.into_arc(),
                     };
                     anyhow::Ok(project.open_buffer(project_path, cx))
-                })??
+                })?
                 .await?;
 
             included_files.insert(path.to_string(), buffer);
@@ -89,7 +89,7 @@ pub async fn apply_diff(
                             .with_context(|| format!("Diff:\n{diff_str}"))?,
                     );
                     anyhow::Ok(())
-                })??;
+                })?;
             }
             DiffEvent::FileEnd { renamed_to } => {
                 let (buffer, _) = current_file
@@ -113,14 +113,14 @@ pub async fn apply_diff(
                                 new_project_path,
                                 cx,
                             ))
-                        })??
+                        })?
                         .await?;
                 }
 
                 let edits = mem::take(&mut edits);
                 buffer.update(cx, |buffer, cx| {
                     buffer.edit(edits, None, cx);
-                })?;
+                });
             }
         }
     }

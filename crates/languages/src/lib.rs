@@ -320,7 +320,7 @@ pub fn init(languages: Arc<LanguageRegistry>, fs: Arc<dyn Fs>, node: NodeRuntime
                             )
                             .log_err();
                     });
-                })?;
+                });
                 prev_language_settings = language_settings;
             }
         }
